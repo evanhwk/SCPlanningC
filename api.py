@@ -2,6 +2,7 @@
 
 import requests
 import os
+import csv
 
 # SONG = 2421807
 __URL__ = 'https://api.planningcenteronline.com/services/v2/songs/'
@@ -63,7 +64,7 @@ def get_song_attachments(song_obj):
             #link_url = str(a['attributes']['remote_link'])
             #print(f'Link: {link_url}')
 
-    print('+++')
+    #print('+++')
 
     param2 = f'{s_id}/arrangements?per_page=100'
     urlpath2 = f'{__URL__}{param2}'
@@ -89,9 +90,9 @@ def get_song_attachments(song_obj):
                 get_url_from_attachment('sp', a, song_obj)
             elif (pco == 'AttachmentLink'):
                 link_url = str(a['attributes']['remote_link'])
-                print(f'Link: {link_url}')
+                #print(f'Link: {link_url}')
 
-    print('-------------------')
+    #print('-------------------')
     return 0
 
 def get_url_from_attachment(urltype, a, song_obj):
@@ -99,10 +100,10 @@ def get_url_from_attachment(urltype, a, song_obj):
         link_url = str(a['attributes']['remote_link'])
         if (urltype == 'yt'):
             song_obj.yt.append(link_url)
-            print(f'Youtube: {link_url}')
+            #print(f'Youtube: {link_url}')
         elif (urltype == 'sp'):
             song_obj.spotify.append(link_url)
-            print(f'Spotify: {link_url}')
+            #print(f'Spotify: {link_url}')
 
     else:
         urlpath = str(a['attributes']['url'])
@@ -111,11 +112,22 @@ def get_url_from_attachment(urltype, a, song_obj):
         link_url = str(r2.url)
         if (urltype == 'yt'):
             song_obj.yt.append(link_url)
-            print(f'Youtube: {link_url}')
+            #print(f'Youtube: {link_url}')
         elif (urltype == 'sp'):
             song_obj.spotify.append(link_url)
-            print(f'Spotify: {link_url}')
+            #print(f'Spotify: {link_url}')
+
+def write_links_to_csv(song_list):
+    with open('export.csv', mode='w', newline='') as csv_file:
+        csv_writer = csv.writer(csv_file, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
+        csv_writer.writerow(['ID', 'Name', 'Youtube', 'Spotify'])
+
+        for song in song_list:
+            csv_writer.writerow([song.id, song.name, song.yt, song.spotify])
 
 songs = get_songs()
+print('Got Songs')
 for song in songs:
     get_song_attachments(song)
+print('Got Links')
+write_links_to_csv(songs)
